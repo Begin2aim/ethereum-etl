@@ -66,12 +66,16 @@ def validate_range(range_start_incl, range_end_incl):
         raise ValueError('range_end must be greater or equal to range_start')
 
 
-def rpc_response_batch_to_results(response,receipts_rpc):
-    for response_item,receipt_req in zip(response,receipts_rpc):
-        yield rpc_response_to_result(response_item,receipt_req)
+def rpc_response_batch_to_results(response,receipts_rpc=None):
+    if receipts_rpc is not None:
+        for response_item,receipt_req in zip(response,receipts_rpc):
+            yield rpc_response_to_result(response_item,receipt_req)
+    else:
+        for response_item in response:
+            yield rpc_response_to_result(response_item)
 
 
-def rpc_response_to_result(response,receipt_req):
+def rpc_response_to_result(response,receipt_req=None):
     result = response.get('result')
     if result is None:
         error_message = 'result is None in response {}.'.format(response)
@@ -83,7 +87,8 @@ def rpc_response_to_result(response,receipt_req):
             # avoid raising error shutdown etl
             # raise RetriableValueError(error_message)
         elif response.get('error') is not None and is_retriable_error(response.get('error').get('code')):
-            raise RetriableValueError(error_message)
+            print("=== the error is not None! === error : %s" % response.get('error'))
+            # raise RetriableValueError(error_message)
         # raise ValueError(error_message)
     return result
 

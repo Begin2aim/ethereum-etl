@@ -38,5 +38,12 @@ def extract_csv_column(input, output, column):
 
     with smart_open(input, 'r') as input_file, smart_open(output, 'w') as output_file:
         reader = csv.DictReader(input_file)
-        for row in reader:
-            output_file.write(row[column] + '\n')
+        # 添加 extract 多 column 情况，若有多 column 则转换成 csv（加上 header）
+        if column.find(',') > -1:
+            columns = column.split(',')
+            output_file.write(','.join(columns) + '\n')
+            for row in reader:
+                output_file.write(','.join([row[c] for c in columns]) + '\n')
+        else:
+            for row in reader:
+                output_file.write(row[column] + '\n')

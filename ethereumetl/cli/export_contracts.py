@@ -22,6 +22,8 @@
 
 
 import click
+import pandas as pd
+import os
 
 from blockchainetl.file_utils import smart_open
 from ethereumetl.jobs.export_contracts_job import ExportContractsJob
@@ -48,8 +50,7 @@ def export_contracts(batch_size, contract_addresses, output, max_workers, provid
     """Exports contracts bytecode and sighashes."""
     check_classic_provider_uri(chain, provider_uri)
     with smart_open(contract_addresses, 'r') as contract_addresses_file:
-        contract_addresses = (contract_address.strip() for contract_address in contract_addresses_file
-                              if contract_address.strip())
+        contract_addresses = extract_contract_addresses(contract_addresses_file)
         job = ExportContractsJob(
             contract_addresses_iterable=contract_addresses,
             batch_size=batch_size,
@@ -58,3 +59,15 @@ def export_contracts(batch_size, contract_addresses, output, max_workers, provid
             max_workers=max_workers)
 
         job.run()
+
+def extract_contract_addresses(contract_addresses_file):
+    """
+    提取 合约地址
+    - 若为 csv，则根据列提取，若不为，则直接提取
+    """
+    if os.path.splitext(contract_addresses_file)[1] == 'csv':
+        df_contract_addresses_file = pd.read_csv(contract_addresses_file)
+        return list(df_contract_addresses_file['contract_address'].dropna)
+
+    return (contract_address.strip() for contract_address in contract_addresses_file
+     if contract_address.strip())

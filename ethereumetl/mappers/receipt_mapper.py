@@ -47,6 +47,9 @@ class EthReceiptMapper(object):
 
         receipt.root = json_dict.get('root')
         receipt.status = hex_to_dec(json_dict.get('status'))
+        receipt.tx_from = json_dict.get('from')
+        receipt.tx_to = json_dict.get('to')
+        receipt.type = json_dict.get('type')
 
         receipt.effective_gas_price = hex_to_dec(json_dict.get('effectiveGasPrice'))
 
@@ -69,5 +72,8 @@ class EthReceiptMapper(object):
             'contract_address': receipt.contract_address,
             'root': receipt.root,
             'status': receipt.status,
-            'effective_gas_price': receipt.effective_gas_price
+            'effective_gas_price': receipt.effective_gas_price,
+            'from': receipt.tx_from,
+            'to': receipt.tx_to,
+            'tx_type': receipt.type
         }
